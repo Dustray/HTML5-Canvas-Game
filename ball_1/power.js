@@ -1,5 +1,6 @@
 
 var clip = new Array();
+var brickWarehouse = new Array();
 var nowXPosition = 0;
 var MoveBar = function (context, canvasWidth, canvasHeight) {
     this.context = context;
@@ -29,6 +30,23 @@ MoveBar.prototype.shoot = function () {
             clip.splice(i, 1);
             continue;
         }
+        var x1 = clip[i].x;
+        var y1 = clip[i].y;
+        //碰撞检测
+        for (var j = 0; j < brickWarehouse.length; j++) {
+            var x2 = brickWarehouse[j].x;
+            var y2 = brickWarehouse[j].y;
+            if (Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow(y1 - y2, 2)) < 25) {
+                //碰撞成功
+                if (brickWarehouse[j].remainTimes > 1) {
+                    brickWarehouse[j].remainTimes--;
+                    clip.splice(i, 1);
+                } else {
+                    clip.splice(i, 1);
+                    brickWarehouse.splice(j, 1);
+                }
+            }
+        }
     }
 };
 
@@ -39,6 +57,7 @@ var Bullet = function (context, xPosition, yPosition) {
 }
 Bullet.prototype.shootOne = function () {
     context.beginPath();
+    context.fillStyle="#000";
     context.arc(this.x, this.y - 15, 5, 0, 2 * Math.PI, true);
     context.fill();
     this.y -= 10;
@@ -49,7 +68,6 @@ Bullet.prototype.shootOne = function () {
 }
 
 
-var brickWarehouse = new Array();
 var BrickManage = function (context, canvasWidth, canvasHeight) {
     this.context = context;
     this.canvasWidth = canvasWidth;
@@ -66,6 +84,10 @@ BrickManage.prototype.reflesh = function () {
     for (var i = 0; i < brickWarehouse.length; i++) {
         if (brickWarehouse[i].downMove() == -1) {
             //此处应结束游戏
+            alert("GAME OVER");
+            clip.splice(0,clip.length);//清空数组 
+            brickWarehouse.splice(0,brickWarehouse.length);//清空数组 
+            //
             brickWarehouse.splice(i, 1);
             continue;
         }
@@ -77,11 +99,19 @@ var Brick = function (context, xPosition, canvasHeight) {
     this.x = xPosition;
     this.y = 30;
     this.canvasHeight = canvasHeight;
-    this.remainTimes = 10;
+    this.remainTimes = Math.round(Math.random() * (6) + 5);//均衡获取5到10的随机整数;
 }
 Brick.prototype.downMove = function () {
     context.beginPath();
+    context.fillStyle="#000"
     context.arc(this.x, this.y, 20, 0, 2 * Math.PI, true);
+    context.fill();
+    
+    context.beginPath();
+    context.font="bold 15px Arial"
+    context.textAlign='center';
+    context.fillStyle="#fff";
+    context.fillText(this.remainTimes,this.x, this.y+5);
     context.fill();
     this.y += 1;
     if (this.y > this.canvasHeight)

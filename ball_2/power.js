@@ -2,32 +2,25 @@
 var clip = new Array();//弹夹数组
 var brickWarehouse = new Array();//砖块仓库数组
 var propWarehouse = new Array();//道具仓库数组
+var propLiveWarehouse = new Array();//道具仓库数组
 var gunXPosition = 0;
 var gunYPosition = 0;
 var nowXPosition = 0;//滑块当前x轴位置
 var nowYPosition = 0;//滑块当前y轴位置
 var scoreAll = 0;//总分
-var rewardMode = false;//奖励模式
+var propMode = 0;//道具模式
 var gunCount = 0;//霰弹枪子弹数量。
 var xySpeed = new Array(2);//球xy方向速度
 var xyBrickSpeed = new Array(2);//球xy方向速度
 var aimShoot = false;
 
 function shootBullet() {
-    //  alert("sss"+nowXPosition+":"+ gunXPosition+":"+nowYPosition + ":"+gunYPosition);
-    //console.log(xySpeed[0] + "+" + xySpeed[1]);
-    //xySpeed = getXYSpeed(nowXPosition - gunXPosition, nowYPosition - gunYPosition);
+    for (i = -2; i <= 2; i++) {
 
-    var bullet1 = new Bullet(this.context, nowXPosition, nowYPosition, 0, xySpeed[0], xySpeed[1]);
-    clip.push(bullet1);
-    if (rewardMode) {
-        var bullet2 = new Bullet(this.context, nowXPosition, nowYPosition, 2, xySpeed[0], xySpeed[1]);
-        var bullet3 = new Bullet(this.context, nowXPosition, nowYPosition, -2, xySpeed[0], xySpeed[1]);
-        clip.push(bullet2);
-        clip.push(bullet3);
+        //var xySpeed = getXYSpeed(gunXPosition - nowXPosition, gunYPosition - nowYPosition, 10);
+        var bullet = new Bullet(this.context, nowXPosition, nowYPosition, i, xySpeed[0], xySpeed[1]);
+        clip.push(bullet);
     }
-
-    //console.log("s")
 }
 
 //Movebar类，管理子弹
@@ -40,7 +33,7 @@ var UserBall = function (context, canvasWidth, canvasHeight) {
     nowXPosition = canvasWidth / 2;//当前userBall位置
     nowYPosition = canvasHeight * 2 / 3;//当前userBall位置
 
-    this.shootInterval = setInterval(shootBullet, 100);//射击速度
+    this.shootInterval;
 };
 UserBall.prototype.moveTo = function (x, y) {
 
@@ -72,6 +65,8 @@ UserBall.prototype.moveTo = function (x, y) {
 
 };
 UserBall.prototype.shoot = function () {
+
+
     //alert("s" + clip.length);
     if (aimShoot) {//瞄准射击
         context.beginPath();
@@ -97,30 +92,14 @@ UserBall.prototype.shoot = function () {
                 //碰撞成功
                 var score = document.getElementById("score");
                 score.innerHTML = "分数：" + ++scoreAll;
-                if (scoreAll % 50 == 0 && rewardMode == false) {//开启奖励模式
-                    rewardMode = true;
-                    setTimeout("rewardMode=false;", 5000);
-                } else if (scoreAll % 20 == 0) {//奖励霰弹丸
-                    //gunCount++;
-                    var gunBullet = document.getElementById("gun");
-                    gunBullet.innerHTML = "霰弹丸：" + ++gunCount;
-
-                }
 
                 clip.splice(i, 1);
                 brickWarehouse.splice(j, 1);
-
             }
         }
     }
 };
 UserBall.prototype.gunShoot = function () {
-    for (i = -5; i <= 5; i++) {
-
-        var xySpeed = getXYSpeed(gunXPosition - nowXPosition, gunYPosition - nowYPosition, 10);
-        var bullet = new Bullet(this.context, nowXPosition, this.canvasHeight, i, xySpeed[0], xySpeed[1]);
-        clip.push(bullet);
-    }
 
 }
 
@@ -190,6 +169,7 @@ BrickManage.prototype.reflesh = function () {
             alert("GAME OVER  总分：" + scoreAll);
             clip.splice(0, clip.length);//清空数组 
             brickWarehouse.splice(0, brickWarehouse.length);//清空数组 
+            propWarehouse.splice(0, propWarehouse.length);//清空数组 
             scoreAll = 0;
             gunCount = 0;
             continue;
@@ -258,17 +238,15 @@ var PropManage = function (context, canvasWidth, canvasHeight) {
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
     setInterval(function () {
-        var x = Math.round(Math.random() * canvasWidth);//均衡获取50到cWidth-50的随机整数
-        var y = Math.round(Math.random() * canvasHeight);//均衡获取50到cWidth-50的随机整数
-        
-        var propType = Math.round(Math.random() * 2+1);
-        console.log(propType);
+        var x = Math.round(Math.random() * (canvasWidth - 50) + 50);//均衡获取50到canvasWidth-50的随机整数
+        var y = Math.round(Math.random() * (canvasHeight - 50) + 50);//均衡获取50到canvasWidth-50的随机整数
+
+        var propType = Math.round(Math.random() * 2 + 1);
+
         var prop = new Prop(this.context, x, y, propType);
 
         propWarehouse.push(prop);
-        //
-        //console.log("s")
-    }, 10000);//出道具速度
+    }, 2000);//出道具速度
 };
 PropManage.prototype.reflesh = function () {
     //alert("s" + clip.length);
@@ -279,22 +257,40 @@ PropManage.prototype.reflesh = function () {
         var x2 = propWarehouse[i].x;
         var y2 = propWarehouse[i].y;
         if (Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow(y1 - y2, 2)) < 30) {
-            //碰撞成功,道具生效
-            propWarehouse.splice(i, 1);
-            switch(propWarehouse[i]){
+            console.log(i);
+            console.log("type" + propWarehouse[i].type);
+            //如果当前道具跟刚刚生效类型相同则跳过
+            if (propMode == propWarehouse[i].type) {
+                //碰撞成功,道具生效
+                propWarehouse.splice(i, 1);
+                return;
+            }
+            //如果当前道具跟所有正在生效类型相同则跳过
+            for (var j = 0; j < propLiveWarehouse.length; j++) {
+                if (propLiveWarehouse[j] == propWarehouse[i].type) {
+                    //碰撞成功,道具生效
+                    propWarehouse.splice(i, 1);
+                    return;
+                }
+            }
+            propLiveWarehouse.push(propWarehouse[i].type);//将当前即将生效类型推入活动队列
+
+            //console.log(propWarehouse[i]);
+            propMode = propWarehouse[i].type;//将当前即将生效类型放入当前最后生效类型变量
+            //console.log(propWarehouse[i].type);
+
+            //道具生效，5秒钟后失效
+            switch (propWarehouse[i].type) {
                 case 1:
-                
-                setTimeout("rewardMode=false;", 5000);
-                    break;
-                case 2:
-                    this.propColor = "#E91E63";
-                    this.hint = "擦";
-                    break;
-                case 3:
-                    this.propColor = "#00BCD4";
-                    this.hint = "镖";
+                    userBall.shootInterval = setInterval(shootBullet, 100);//射击速度
+                    setTimeout("clearInterval(userBall.shootInterval);", 5000);
+
                     break;
             }
+            setTimeout("propLiveWarehouse.shift();", 5000);
+            setTimeout("propMode=0;", 5000);
+            //碰撞成功,道具生效
+            propWarehouse.splice(i, 1);
             continue;
             //
         }
