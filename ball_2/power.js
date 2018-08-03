@@ -9,11 +9,12 @@ var nowXPosition = 0;//滑块当前x轴位置
 var nowYPosition = 0;//滑块当前y轴位置
 var scoreAll = 0;//总分
 var propMode = 0;//最后一次道具模式类型
-var gunCount = 0;//霰弹枪子弹数量。
 var xySpeed = new Array(2);//球xy方向速度
 var xyBrickSpeed = new Array(2);//球xy方向速度
 var aimShoot = false;//指向射击
 var turnIntoDart = false;//道具模式：变成飞镖false
+var leaveMe = false;//道具模式：所有小球反向离开玩家
+
 
 function shootBullet() {
     for (i = -2; i <= 2; i++) {
@@ -36,7 +37,8 @@ var UserBall = function (context, canvasWidth, canvasHeight) {
     this.radius = 10;
     this.shootInterval;
     this.dartImage = new Image();
-this.dartRotate = 1;
+    this.dartRotate = 1;
+    this.dartCountdown = 5;
 
 };
 UserBall.prototype.moveTo = function (x, y) {
@@ -45,18 +47,24 @@ UserBall.prototype.moveTo = function (x, y) {
         //道具模式：飞镖就绪
         this.dartImage.src = "dart.png";
         context.save();
-        context.translate(x,y);
-        context.rotate(-this.dartRotate++ *10*Math.PI/180);
-        context.translate(-x,-y);
+        context.translate(x, y);
+        context.rotate(-this.dartRotate++ * 10 * Math.PI / 180);
+        context.translate(-x, -y);
         if (aimShoot) {
             context.drawImage(this.dartImage, nowXPosition - 25, nowYPosition - 25, 50, 50);
         } else {
             context.drawImage(this.dartImage, x - 25, y - 25, 50, 50);
-        } 
+        }
         context.restore();
+        //飞镖倒计时
+        context.beginPath();
+        context.font = "20px Arial";
+        context.textAlign = 'center';
+        context.fillStyle = "#dd0000";
+        context.fillText(this.dartCountdown, x - 12, y - 7);
+        context.fill();
         //道具模式：飞镖结束
     } else {
-        //var y = this.canvasHeight - 10;//e.pageY - canvas.clientTop;
         context.beginPath();
         this.context.fillStyle = "#009688";
         if (aimShoot) {
@@ -95,6 +103,7 @@ UserBall.prototype.shoot = function () {
         context.lineWidth = 5;
         context.strokeStyle = "red";
         context.stroke();
+
     }
     for (var i = 0; i < clip.length; i++) {
         if (clip[i].shootOne() == -1) {
@@ -109,8 +118,8 @@ UserBall.prototype.shoot = function () {
             var y2 = brickWarehouse[j].y;
             if (Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow(y1 - y2, 2)) < this.radius + 5) {
                 //碰撞成功
-                var score = document.getElementById("score");
-                score.innerHTML = "分数：" + ++scoreAll;
+                var showScore = document.getElementById("score");
+                showScore.innerHTML = "分数：" + ++scoreAll;
 
                 clip.splice(i, 1);
                 brickWarehouse.splice(j, 1);
@@ -188,6 +197,8 @@ BrickManage.prototype.reflesh = function () {
             if (turnIntoDart) {
                 //此处变成飞镖
                 brickWarehouse.splice(i, 1);//消除方块
+                var showScore = document.getElementById("score");
+                showScore.innerHTML = "分数：" + ++scoreAll;
             } else {
                 //此处应结束游戏
                 alert("GAME OVER  总分：" + scoreAll);
@@ -196,7 +207,6 @@ BrickManage.prototype.reflesh = function () {
                 propWarehouse.splice(0, propWarehouse.length);//清空数组 
                 propLiveWarehouse.splice(0, propLiveWarehouse.length);//清空数组 
                 scoreAll = 0;
-                gunCount = 0;
                 continue;
             }
             //
@@ -223,8 +233,11 @@ Brick.prototype.downMove = function () {
     context.stroke();
     context.fill();
 
-
-    xyBrickSpeed = getXYSpeed(nowXPosition - this.x, nowYPosition - this.y, 1);
+    if (leaveMe) {
+        xyBrickSpeed = getXYSpeed(this.x - nowXPosition, this.y - nowYPosition, 1);
+    } else {
+        xyBrickSpeed = getXYSpeed(nowXPosition - this.x, nowYPosition - this.y, 1);
+    }
     this.x += xyBrickSpeed[0];
     this.y += xyBrickSpeed[1];
 
@@ -267,12 +280,12 @@ var PropManage = function (context, canvasWidth, canvasHeight) {
         var x = Math.round(Math.random() * (canvasWidth - 50) + 50);//均衡获取50到canvasWidth-50的随机整数
         var y = Math.round(Math.random() * (canvasHeight - 50) + 50);//均衡获取50到canvasWidth-50的随机整数
 
-        var propType = Math.round(Math.random() * 2 + 1);
+        var propType = Math.round(Math.random() * 3 + 1);
 
         var prop = new Prop(this.context, x, y, propType);
 
         propWarehouse.push(prop);
-    }, 2000);//出道具速度
+    }, 10000);//出道具速度
 };
 PropManage.prototype.reflesh = function () {
     //alert("s" + clip.length);
@@ -283,13 +296,15 @@ PropManage.prototype.reflesh = function () {
         var x2 = propWarehouse[i].x;
         var y2 = propWarehouse[i].y;
         if (Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow(y1 - y2, 2)) < userBall.radius + 20) {
-            console.log(i);
-            console.log("type" + propWarehouse[i].type);
+
             if (propWarehouse[i].type == 2) {
                 //道具清屏，立即生效
-                if (brickWarehouse.length > 0)
+                if (brickWarehouse.length > 0) {
+                    scoreAll += brickWarehouse.length;
+                    var showScore = document.getElementById("score");
+                    showScore.innerHTML = "分数：" + scoreAll;
                     brickWarehouse.splice(0, brickWarehouse.length);//清空数组 
-
+                }
                 propWarehouse.splice(i, 1);
                 return;
             }
@@ -318,13 +333,21 @@ PropManage.prototype.reflesh = function () {
                 case 1:
                     userBall.shootInterval = setInterval(shootBullet, 200);//射击速度
                     setTimeout("clearInterval(userBall.shootInterval);", 5000);
-
                     break;
                 case 3:
+
+                    userBall.dartCountdown = 5;
                     turnIntoDart = true;
                     userBall.radius = 21;
                     setTimeout("turnIntoDart = false;", 5000);
                     setTimeout("userBall.radius=10;", 5000);
+                    for (i = 1; i < 6; i++) {
+                        setTimeout("userBall.dartCountdown--", i * 1000);
+                    }
+                    break;
+                case 4:
+                    leaveMe = true;
+                    setTimeout("leaveMe=false;", 5000);
 
                     break;
             }
@@ -351,17 +374,22 @@ var Prop = function (context, xPosition, yPosition, type) {
 }
 Prop.prototype.generate = function () {
     switch (this.type) {
-        case 1:
+        case 1://射击
             this.propColor = "#8BC34A";
             this.hint = "枪";
             break;
-        case 2:
+        case 2://清屏
             this.propColor = "#E91E63";
             this.hint = "擦";
             break;
-        case 3:
+        case 3://飞镖
             this.propColor = "#00BCD4";
             this.hint = "镖";
+            break;
+        case 4://远离玩家控制小球
+
+            this.propColor = "#7ba397";
+            this.hint = "反";
             break;
     }
 

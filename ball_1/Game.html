@@ -71,11 +71,17 @@
         return false;//鼠标右键菜单不显示
     }
     function onMouseDown(e) {
-        //霰弹
-        if (gunCount > 0) {
-            moveBar.gunShoot();
-            gunCount--;
-        }
+        if (e.button == 0) {
+            //alert("暂停");//左键
+            //霰弹
+            if (gunCount > 0) {
+                moveBar.gunShoot();
+                gunCount--;
+                var gunBullet = document.getElementById("gun");
+                gunBullet.innerHTML = "霰弹丸：" + gunCount;
+            }
+        } else if (e.button == 2)
+            alert("暂停");//右键
     }
 
     function onMouseMove(e) {
@@ -84,11 +90,7 @@
     }
 
     function onMouseUp(e) {
-        if (e.button == 0) {
-            //alert("暂停");//左键
-        }
-        else if (e.button == 2)
-            alert("暂停");//右键
+
     }
 
 

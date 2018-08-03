@@ -5,12 +5,15 @@ var nowXPosition = 0;//滑块当前x轴位置
 var scoreAll = 0;//总分
 var rewardMode = false;//奖励模式
 var gunCount = 0;//霰弹枪子弹数量。
+
 var MoveBar = function (context, canvasWidth, canvasHeight) {
     this.context = context;
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
     nowXPosition = canvasWidth / 2;//当前moveBar位置
+
     setInterval(function () {
+
         var bullet1 = new Bullet(this.context, nowXPosition, canvasHeight, 0);
         clip.push(bullet1);
         if (rewardMode) {
@@ -19,6 +22,7 @@ var MoveBar = function (context, canvasWidth, canvasHeight) {
             clip.push(bullet2);
             clip.push(bullet3);
         }
+
         //console.log("s")
     }, 100);//射击速度
 };
@@ -49,13 +53,14 @@ MoveBar.prototype.shoot = function () {
                 //碰撞成功
                 var score = document.getElementById("score");
                 score.innerHTML = "分数：" + ++scoreAll;
-                if (scoreAll % 50 == 0) {//开启奖励模式
+                if (scoreAll % 50 == 0 && rewardMode == false) {//开启奖励模式
                     rewardMode = true;
                     setTimeout("rewardMode=false;", 5000);
-                } else if (scoreAll % 100 == 0) {//奖励霰弹丸
+                } else if (scoreAll % 20 == 0) {//奖励霰弹丸
                     //gunCount++;
                     var gunBullet = document.getElementById("gun");
                     gunBullet.innerHTML = "霰弹丸：" + ++gunCount;
+
                 }
                 if (brickWarehouse[j].remainTimes > 1) {
                     brickWarehouse[j].remainTimes--;
@@ -112,10 +117,11 @@ BrickManage.prototype.reflesh = function () {
     for (var i = 0; i < brickWarehouse.length; i++) {
         if (brickWarehouse[i].downMove() == -1) {
             //此处应结束游戏
-            alert("GAME OVER");
+            alert("GAME OVER  总分：" + scoreAll);
             clip.splice(0, clip.length);//清空数组 
             brickWarehouse.splice(0, brickWarehouse.length);//清空数组 
             scoreAll = 0;
+            gunCount = 0;
             //
             brickWarehouse.splice(i, 1);
             continue;
