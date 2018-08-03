@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script language="JavaScript" src="power.js"></script>
+</head>
+<style>
+    body {
+        text-align: center;
+        overflow: scroll;
+        overflow-x: hidden;
+        overflow-y: hidden;
+    }
+
+    canvas {
+        border: 5px solid #009688;
+        border-radius: 20px;
+    }
+
+    .toolbar {
+        color: #009688;
+        font-size: 20px;
+        text-align: left;
+        overflow: hidden;
+    }
+
+    .toolbar>p {
+        margin: 0;
+        padding: 0;
+        float: left;
+    }
+</style>
+
+<body>
+    <div class="toolbar">
+        <p id="score">分数：0</p>
+    </div>
+    <canvas id="myCanvas" width="800" height="400"></canvas>
+</body>
+<script type="text/javascript">
+    var canvas = document.getElementById("myCanvas");
+    var cWidth = 800, cHeight = 400;
+    var userBall, bricks ,prop;
+    window.onload = window.onresize = function () {
+        //alert("ss");
+        cWidth = canvas.width = window.innerWidth - 30;
+        cHeight = canvas.height = window.innerHeight - 55;
+        userBall = new UserBall(context, cWidth, cHeight);
+        bricks = new BrickManage(context, cWidth, cHeight);
+        prop = new PropManage(context, cWidth, cHeight);
+        setInterval(function () {
+            context.clearRect(0, 0, cWidth, cHeight);
+            bricks.reflesh();
+            prop.reflesh();
+            userBall.shoot();
+            userBall.moveTo(nowXPosition, nowYPosition);
+        }, 1000 / 60);
+    }
+    var context = canvas.getContext("2d");
+    canvas.addEventListener("mousedown", onMouseDown, false);
+    canvas.addEventListener("mousemove", onMouseMove, false);
+    canvas.addEventListener("mouseup", onMouseUp, false);
+    document.addEventListener("keydown", onKeyDown, false);
+    document.oncontextmenu = function () {
+        return false;//鼠标右键菜单不显示
+    }
+    function onMouseDown(e) {
+        if (e.button == 0) {
+            //alert("暂停");//左键
+            //霰弹
+            // if (gunCount > 0) {
+            //     userBall.gunShoot();
+            //     gunCount--;
+            //     var gunBullet = document.getElementById("gun");
+            //     gunBullet.innerHTML = "霰弹丸：" + gunCount;
+            // }
+            aimShoot=true;
+        } else if (e.button == 2)
+            alert("暂停");//右键
+    }
+
+    function onMouseMove(e) {
+        var x = e.pageX - canvas.clientLeft - 9;
+        var y = e.pageY - canvas.clientTop - 33;
+        if (x - 10 < 0 || x + 10 > this.canvasWidth)
+            return;//若x位置超出边界就停止
+        if (y - 10 < 0 || y + 10 > this.canvasHeight)
+            return;//若x位置超出边界就停止
+        userBall.moveTo(x, y);
+    }
+
+    function onMouseUp(e) {
+        if (e.button == 0) {
+            //alert("暂停");//左键
+           
+            aimShoot=false;
+        }
+    }
+
+    function onKeyDown(e) {
+        //alert(e.keyCode);//87 65 83 68
+        var step = 10;
+        var x = nowXPosition, y = nowYPosition;
+        switch (e.keyCode) {
+            case 87: y = y - step; break;
+            case 65: x = x - step; break;
+            case 83: y = y + step; break;
+            case 68: x = x + step; break;
+        }
+        if (x - 10 < 0 || x + 10 > this.canvasWidth)
+            return;//若x位置超出边界就停止
+        if (y - 10 < 0 || y + 10 > this.canvasHeight)
+            return;//若x位置超出边界就停止
+        userBall.moveTo(x, y);
+
+    }
+
+
+</script>
+
+
+</html>

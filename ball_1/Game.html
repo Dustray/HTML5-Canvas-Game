@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script language="JavaScript" src="power.js"></script>
+</head>
+<style>
+    body {
+        text-align: center;
+        overflow: scroll;
+        overflow-x: hidden;
+        overflow-y: hidden;
+    }
+
+    canvas {
+        border: 5px solid #009688;
+        border-radius: 20px;
+    }
+</style>
+
+<body>
+    <canvas id="myCanvas" width="800" height="400"></canvas>
+</body>
+<script type="text/javascript">
+    var canvas = document.getElementById("myCanvas");
+    var cWidth = 800, cHeight = 400;
+    var moveBar ,bricks;
+    window.onload = window.onresize = function () {
+        //alert("ss");
+        cWidth = canvas.width = window.innerWidth - 30;
+        cHeight = canvas.height = window.innerHeight - 30;
+        moveBar = new MoveBar(context, cWidth, cHeight);
+        bricks = new BrickManage(context, cWidth, cHeight);
+        setInterval(function () {
+            context.clearRect(0, 0, cWidth, cHeight);
+            bricks.reflesh();
+            moveBar.shoot();
+            moveBar.moveTo(nowXPosition);
+        }, 1000 / 60);
+    }
+    var context = canvas.getContext("2d");
+    canvas.addEventListener("mousedown", onMouseDown, false);
+    canvas.addEventListener("mousemove", onMouseMove, false);
+    canvas.addEventListener("mouseup", onMouseUp, false);
+
+    function onMouseDown(e) {
+        alert(clip.length);
+    }
+
+    function onMouseMove(e) {
+        var x = e.pageX - canvas.clientLeft;
+        moveBar.moveTo(x);
+    }
+
+    function onMouseUp(e) {
+    }
+
+
+</script>
+
+</html>
