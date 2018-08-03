@@ -8,11 +8,12 @@ var gunYPosition = 0;
 var nowXPosition = 0;//滑块当前x轴位置
 var nowYPosition = 0;//滑块当前y轴位置
 var scoreAll = 0;//总分
-var propMode = 0;//道具模式
+var propMode = 0;//最后一次道具模式类型
 var gunCount = 0;//霰弹枪子弹数量。
 var xySpeed = new Array(2);//球xy方向速度
 var xyBrickSpeed = new Array(2);//球xy方向速度
-var aimShoot = false;
+var aimShoot = false;//指向射击
+var turnIntoDart = false;//道具模式：变成飞镖false
 
 function shootBullet() {
     for (i = -2; i <= 2; i++) {
@@ -34,20 +35,34 @@ var UserBall = function (context, canvasWidth, canvasHeight) {
     nowYPosition = canvasHeight * 2 / 3;//当前userBall位置
 
     this.shootInterval;
+    this.dartImage = new Image();
+
+
 };
 UserBall.prototype.moveTo = function (x, y) {
 
-    //var y = this.canvasHeight - 10;//e.pageY - canvas.clientTop;
-    context.beginPath();
-    this.context.fillStyle = "#009688";
-    if (aimShoot) {
-        context.arc(nowXPosition, nowYPosition, 10, 0, 2 * Math.PI, true);
-    } else {
-        context.arc(x, y, 10, 0, 2 * Math.PI, true);
-    }
-    //context.rect(x - 20, y, 40, 6);
+    if (turnIntoDart) {
 
-    context.fill();
+        //道具模式：飞镖就绪
+        this.dartImage.src = "dart.png";
+        context.save();
+        context.drawImage(this.dartImage, x - 25, y - 25, 50, 50);
+        context.restore();
+        //道具模式：飞镖结束
+    } else {
+        //var y = this.canvasHeight - 10;//e.pageY - canvas.clientTop;
+        context.beginPath();
+        this.context.fillStyle = "#009688";
+        if (aimShoot) {
+            context.arc(nowXPosition, nowYPosition, 10, 0, 2 * Math.PI, true);
+        } else {
+            context.arc(x, y, 10, 0, 2 * Math.PI, true);
+        }
+        //context.rect(x - 20, y, 40, 6);
+        context.fill();
+    }
+
+
 
     if (aimShoot) {//瞄准射击
         gunXPosition = x;
@@ -65,8 +80,6 @@ UserBall.prototype.moveTo = function (x, y) {
 
 };
 UserBall.prototype.shoot = function () {
-
-
     //alert("s" + clip.length);
     if (aimShoot) {//瞄准射击
         context.beginPath();
@@ -165,14 +178,20 @@ BrickManage.prototype.reflesh = function () {
         var y2 = brickWarehouse[i].y;
         if (Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow(y1 - y2, 2)) < 20) {
             //碰撞成功
-            //此处应结束游戏
-            alert("GAME OVER  总分：" + scoreAll);
-            clip.splice(0, clip.length);//清空数组 
-            brickWarehouse.splice(0, brickWarehouse.length);//清空数组 
-            propWarehouse.splice(0, propWarehouse.length);//清空数组 
-            scoreAll = 0;
-            gunCount = 0;
-            continue;
+
+            if (turnIntoDart) {
+                //此处变成飞镖
+                brickWarehouse.splice(i, 1);//消除方块
+            } else {
+                //此处应结束游戏
+                alert("GAME OVER  总分：" + scoreAll);
+                clip.splice(0, clip.length);//清空数组 
+                brickWarehouse.splice(0, brickWarehouse.length);//清空数组 
+                propWarehouse.splice(0, propWarehouse.length);//清空数组 
+                scoreAll = 0;
+                gunCount = 0;
+                continue;
+            }
             //
         }
     }
@@ -259,6 +278,14 @@ PropManage.prototype.reflesh = function () {
         if (Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow(y1 - y2, 2)) < 30) {
             console.log(i);
             console.log("type" + propWarehouse[i].type);
+            if (propWarehouse[i].type == 2) {
+                //道具清屏，立即生效
+                if (brickWarehouse.length > 0)
+                    brickWarehouse.splice(0, brickWarehouse.length);//清空数组 
+
+                propWarehouse.splice(i, 1);
+                return;
+            }
             //如果当前道具跟刚刚生效类型相同则跳过
             if (propMode == propWarehouse[i].type) {
                 //碰撞成功,道具生效
@@ -284,6 +311,11 @@ PropManage.prototype.reflesh = function () {
                 case 1:
                     userBall.shootInterval = setInterval(shootBullet, 100);//射击速度
                     setTimeout("clearInterval(userBall.shootInterval);", 5000);
+
+                    break;
+                case 3:
+                    turnIntoDart = true;
+                    setTimeout("turnIntoDart = false;", 5000);
 
                     break;
             }

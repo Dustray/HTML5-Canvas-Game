@@ -2,6 +2,7 @@
 var clip = new Array();
 var brickWarehouse = new Array();
 var nowXPosition = 0;
+var scoreAll=0;
 var MoveBar = function (context, canvasWidth, canvasHeight) {
     this.context = context;
     this.canvasWidth = canvasWidth;
@@ -38,6 +39,8 @@ MoveBar.prototype.shoot = function () {
             var y2 = brickWarehouse[j].y;
             if (Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow(y1 - y2, 2)) < 25) {
                 //碰撞成功
+                var score = document.getElementById("score");
+                score.innerHTML = "分数："+ ++scoreAll;
                 if (brickWarehouse[j].remainTimes > 1) {
                     brickWarehouse[j].remainTimes--;
                     clip.splice(i, 1);
@@ -57,7 +60,7 @@ var Bullet = function (context, xPosition, yPosition) {
 }
 Bullet.prototype.shootOne = function () {
     context.beginPath();
-    context.fillStyle="#000";
+    context.fillStyle = "#000";
     context.arc(this.x, this.y - 15, 5, 0, 2 * Math.PI, true);
     context.fill();
     this.y -= 10;
@@ -85,8 +88,9 @@ BrickManage.prototype.reflesh = function () {
         if (brickWarehouse[i].downMove() == -1) {
             //此处应结束游戏
             alert("GAME OVER");
-            clip.splice(0,clip.length);//清空数组 
-            brickWarehouse.splice(0,brickWarehouse.length);//清空数组 
+            clip.splice(0, clip.length);//清空数组 
+            brickWarehouse.splice(0, brickWarehouse.length);//清空数组 
+            scoreAll=0;
             //
             brickWarehouse.splice(i, 1);
             continue;
@@ -103,15 +107,15 @@ var Brick = function (context, xPosition, canvasHeight) {
 }
 Brick.prototype.downMove = function () {
     context.beginPath();
-    context.fillStyle="#000"
+    context.fillStyle = '#' + Math.floor(Math.random() * 16777215).toString(16);
     context.arc(this.x, this.y, 20, 0, 2 * Math.PI, true);
     context.fill();
-    
+
     context.beginPath();
-    context.font="bold 15px Arial"
-    context.textAlign='center';
-    context.fillStyle="#fff";
-    context.fillText(this.remainTimes,this.x, this.y+5);
+    context.font = "bold 15px Arial";
+    context.textAlign = 'center';
+    context.fillStyle = "#fff";
+    context.fillText(this.remainTimes, this.x, this.y + 5);
     context.fill();
     this.y += 1;
     if (this.y > this.canvasHeight)

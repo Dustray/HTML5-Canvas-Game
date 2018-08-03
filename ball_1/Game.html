@@ -20,9 +20,19 @@
         border: 5px solid #009688;
         border-radius: 20px;
     }
+    .toolbar{
+        color:#009688;
+        font-size: 20px;
+        
+        text-align: left;
+    }
+
 </style>
 
 <body>
+    <div class="toolbar">
+        <p id="score">分数：0</p>
+    </div>
     <canvas id="myCanvas" width="800" height="400"></canvas>
 </body>
 <script type="text/javascript">
@@ -32,7 +42,7 @@
     window.onload = window.onresize = function () {
         //alert("ss");
         cWidth = canvas.width = window.innerWidth - 30;
-        cHeight = canvas.height = window.innerHeight - 30;
+        cHeight = canvas.height = window.innerHeight - 60;
         moveBar = new MoveBar(context, cWidth, cHeight);
         bricks = new BrickManage(context, cWidth, cHeight);
         setInterval(function () {
@@ -48,7 +58,7 @@
     canvas.addEventListener("mouseup", onMouseUp, false);
 
     function onMouseDown(e) {
-        alert(clip.length);
+        alert("暂停");
     }
 
     function onMouseMove(e) {
