@@ -33,16 +33,24 @@
         padding: 0;
         float: left;
     }
+
+    .toolbar>input {
+        margin: 0;
+        padding: 0;
+        float: right;
+    }
 </style>
 
 <body>
     <div class="toolbar">
         <p id="score">分数：0</p>
-        <p id="speed">速度：0</p>
         <p id="gun">霰弹丸：0</p>
-        <input type="radio" id="colorBlack" value="默认" />默认
-        <input type="radio" id="colorVariety" value="默认" />色彩
-        <input type="radio" id="colorDog" value="默认" />狗眼
+        <input type="button" id="colorBlack" onclick="radioClick(1)" value="默认" />
+
+        <input type="button" id="colorVariety" onclick="radioClick(2)" value="色彩" />
+
+        <input type="button" id="colorDog" onclick="radioClick(3)" value="狗眼" />
+
     </div>
     <canvas id="myCanvas" width="800" height="400"></canvas>
 </body>
@@ -62,6 +70,7 @@
             moveBar.shoot();
             moveBar.moveTo(nowXPosition);
         }, 1000 / 60);
+
     }
     var context = canvas.getContext("2d");
     canvas.addEventListener("mousedown", onMouseDown, false);
@@ -92,7 +101,23 @@
     function onMouseUp(e) {
 
     }
-
+    function radioClick(a) {
+        //alert("s"+a);
+        switch (a) {
+            case 1:
+                ballMoreColor = false;
+                isDog = false;
+                break;
+            case 2:
+                ballMoreColor = true;
+                isDog = false;
+                break;
+            case 3:
+                ballMoreColor = false;
+                isDog = true;
+                break;
+        }
+    }
 
 </script>
 

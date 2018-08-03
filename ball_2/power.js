@@ -39,21 +39,24 @@ var UserBall = function (context, canvasWidth, canvasHeight) {
     this.dartImage = new Image();
     this.dartRotate = 1;
     this.dartCountdown = 5;
+    this.x =  nowXPosition;
+    this.y =  nowYPosition;
 
 };
-UserBall.prototype.moveTo = function (x, y) {
+
+UserBall.prototype.reflesh = function () {
 
     if (turnIntoDart) {
         //道具模式：飞镖就绪
         this.dartImage.src = "dart.png";
         context.save();
-        context.translate(x, y);
+        context.translate(this.x, this.y);
         context.rotate(-this.dartRotate++ * 10 * Math.PI / 180);
-        context.translate(-x, -y);
+        context.translate(-this.x, -this.y);
         if (aimShoot) {
             context.drawImage(this.dartImage, nowXPosition - 25, nowYPosition - 25, 50, 50);
         } else {
-            context.drawImage(this.dartImage, x - 25, y - 25, 50, 50);
+            context.drawImage(this.dartImage,this. x - 25, this.y - 25, 50, 50);
         }
         context.restore();
         //飞镖倒计时
@@ -61,7 +64,7 @@ UserBall.prototype.moveTo = function (x, y) {
         context.font = "20px Arial";
         context.textAlign = 'center';
         context.fillStyle = "#dd0000";
-        context.fillText(this.dartCountdown, x - 12, y - 7);
+        context.fillText(this.dartCountdown,this. x - 12, this.y - 7);
         context.fill();
         //道具模式：飞镖结束
     } else {
@@ -70,7 +73,7 @@ UserBall.prototype.moveTo = function (x, y) {
         if (aimShoot) {
             context.arc(nowXPosition, nowYPosition, this.radius, 0, 2 * Math.PI, true);
         } else {
-            context.arc(x, y, this.radius, 0, 2 * Math.PI, true);
+            context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, true);
         }
         //context.rect(x - 20, y, 40, 6);
         context.fill();
@@ -79,19 +82,23 @@ UserBall.prototype.moveTo = function (x, y) {
 
 
     if (aimShoot) {//瞄准射击
-        gunXPosition = x;
-        gunYPosition = y;
+        gunXPosition =this. x;
+        gunYPosition =this. y;
     } else {//移动模式
         gunXPosition = this.canvasWidth / 2;
         gunYPosition = this.canvasHeight / 2;
-        nowXPosition = x;
-        nowYPosition = y;
+        nowXPosition = this.x;
+        nowYPosition = this.y;
     }
     //console.log(nowXPosition + "+" + gunXPosition + "s" + nowYPosition + "+" + gunYPosition);
 
     xySpeed = getXYSpeed(gunXPosition - nowXPosition, gunYPosition - nowYPosition, 10);
 
+}
+UserBall.prototype.moveTo = function (x, y) {
 
+this.x=x;
+this.y=y;
 };
 UserBall.prototype.shoot = function () {
     //alert("s" + clip.length);
@@ -103,7 +110,6 @@ UserBall.prototype.shoot = function () {
         context.lineWidth = 5;
         context.strokeStyle = "red";
         context.stroke();
-
     }
     for (var i = 0; i < clip.length; i++) {
         if (clip[i].shootOne() == -1) {
@@ -370,6 +376,8 @@ var Prop = function (context, xPosition, yPosition, type) {
     this.type = type;
     this.propColor = "#000";
     this.hint = "枪";
+    this.img = new Image();
+    this.frm = 0;
     //console.log(this.x+"s"+this.y+"s");
 }
 Prop.prototype.generate = function () {
@@ -377,29 +385,39 @@ Prop.prototype.generate = function () {
         case 1://射击
             this.propColor = "#8BC34A";
             this.hint = "枪";
+            this.img.src = "红球球.png";
             break;
         case 2://清屏
             this.propColor = "#E91E63";
             this.hint = "擦";
+            this.img.src = "黄球球.png";
             break;
         case 3://飞镖
             this.propColor = "#00BCD4";
             this.hint = "镖";
+            this.img.src = "蓝球球.png";
             break;
         case 4://远离玩家控制小球
 
             this.propColor = "#7ba397";
             this.hint = "反";
+            this.img.src = "绿球球.png";
             break;
     }
 
     context.beginPath();
-    context.fillStyle = this.propColor;
+    // context.fillStyle = this.propColor;
     context.strokeStyle = "#607D8B";
-    context.lineWidth = 5;
+    context.lineWidth = 3;
     context.arc(this.x, this.y, 20, 0, 2 * Math.PI, true);
     context.stroke();
-    context.fill();
+    // context.fill();
+
+    context.save();
+    context.drawImage(this.img, 0, this.frm * 200, 200, 200, this.x - 20, this.y - 20, 40, 40);
+    context.restore();
+    this.frm++;
+    if (this.frm >= 4) this.frm = 0;
 
     context.beginPath();
     context.font = "18px Arial";

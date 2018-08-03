@@ -5,13 +5,15 @@ var nowXPosition = 0;//滑块当前x轴位置
 var scoreAll = 0;//总分
 var rewardMode = false;//奖励模式
 var gunCount = 0;//霰弹枪子弹数量。
+var ballMoreColor = true, isDog = false;
 
 var MoveBar = function (context, canvasWidth, canvasHeight) {
     this.context = context;
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
     nowXPosition = canvasWidth / 2;//当前moveBar位置
-
+    this.img = new Image();
+    this.frm=1;
     setInterval(function () {
 
         var bullet1 = new Bullet(this.context, nowXPosition, canvasHeight, 0);
@@ -30,10 +32,17 @@ MoveBar.prototype.moveTo = function (x) {
     if (x - 20 < 0 || x + 20 > this.canvasWidth)
         return;//若x位置超出边界就停止
     var y = this.canvasHeight - 10;//e.pageY - canvas.clientTop;
-    context.beginPath();
-    context.arc(x, y - 5, 5, 0, 2 * Math.PI, true);
-    context.rect(x - 20, y, 40, 6);
-    context.fill();
+    // context.beginPath();
+    // context.arc(x, y - 5, 5, 0, 2 * Math.PI, true);
+    // context.rect(x - 20, y, 40, 6);
+    // context.fill();
+
+    context.save();
+    if(x)
+    this.img.src = "plane.png";
+    context.drawImage(this.img, this.frm * 500, 0, 500, 500, x-25, y - 30, 60, 60);
+    context.restore();
+
     nowXPosition = x;
 };
 MoveBar.prototype.shoot = function () {
@@ -105,6 +114,7 @@ var BrickManage = function (context, canvasWidth, canvasHeight) {
     this.context = context;
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
+
     setInterval(function () {
         var x = Math.round(Math.random() * (canvasWidth - 100) + 50);//均衡获取50到cWidth-50的随机整数
         var brick = new Brick(this.context, x, canvasHeight);
@@ -135,12 +145,16 @@ var Brick = function (context, xPosition, canvasHeight) {
     this.y = 30;
     this.canvasHeight = canvasHeight;
     this.remainTimes = Math.round(Math.random() * (6) + 5);//均衡获取5到10的随机整数;
-    this.ballColor = '#' + Math.floor(Math.random() * 16777210 + 5).toString(16);
+    this.ballColor = ballMoreColor ? '#' + Math.floor(Math.random() * 16777210 + 5).toString(16) : "#000";
+    //this.isDog = false;
 }
 Brick.prototype.downMove = function () {
     context.beginPath();
-    context.fillStyle = this.ballColor;
+    context.fillStyle = isDog ? '#' + Math.floor(Math.random() * 16777210 + 5).toString(16) : this.ballColor;
+    context.strokeStyle = "#888";
+    context.lineWidth = 5;
     context.arc(this.x, this.y, 20, 0, 2 * Math.PI, true);
+    context.stroke();
     context.fill();
 
     context.beginPath();
