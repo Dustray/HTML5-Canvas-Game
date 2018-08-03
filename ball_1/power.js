@@ -1,16 +1,24 @@
 
-var clip = new Array();
-var brickWarehouse = new Array();
-var nowXPosition = 0;
-var scoreAll=0;
+var clip = new Array();//弹夹数组
+var brickWarehouse = new Array();//砖块仓库数组
+var nowXPosition = 0;//滑块当前x轴位置
+var scoreAll = 0;//总分
+var rewardMode = false;//奖励模式
+var gunCount = 0;//霰弹枪子弹数量。
 var MoveBar = function (context, canvasWidth, canvasHeight) {
     this.context = context;
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
     nowXPosition = canvasWidth / 2;//当前moveBar位置
     setInterval(function () {
-        var buttet = new Bullet(this.context, nowXPosition, canvasHeight);
-        clip.push(buttet);
+        var bullet1 = new Bullet(this.context, nowXPosition, canvasHeight, 0);
+        clip.push(bullet1);
+        if (rewardMode) {
+            var bullet2 = new Bullet(this.context, nowXPosition, canvasHeight, 2);
+            var bullet3 = new Bullet(this.context, nowXPosition, canvasHeight, -2);
+            clip.push(bullet2);
+            clip.push(bullet3);
+        }
         //console.log("s")
     }, 100);//射击速度
 };
@@ -40,7 +48,15 @@ MoveBar.prototype.shoot = function () {
             if (Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow(y1 - y2, 2)) < 25) {
                 //碰撞成功
                 var score = document.getElementById("score");
-                score.innerHTML = "分数："+ ++scoreAll;
+                score.innerHTML = "分数：" + ++scoreAll;
+                if (scoreAll % 50 == 0) {//开启奖励模式
+                    rewardMode = true;
+                    setTimeout("rewardMode=false;", 5000);
+                } else if (scoreAll % 100 == 0) {//奖励霰弹丸
+                    //gunCount++;
+                    var gunBullet = document.getElementById("gun");
+                    gunBullet.innerHTML = "霰弹丸：" + ++gunCount;
+                }
                 if (brickWarehouse[j].remainTimes > 1) {
                     brickWarehouse[j].remainTimes--;
                     clip.splice(i, 1);
@@ -52,11 +68,19 @@ MoveBar.prototype.shoot = function () {
         }
     }
 };
+MoveBar.prototype.gunShoot = function () {
+    for (i = -10; i <= 10; i++) {
+        var bullet = new Bullet(this.context, nowXPosition, this.canvasHeight, i);
+        clip.push(bullet);
+    }
 
-var Bullet = function (context, xPosition, yPosition) {
+}
+
+var Bullet = function (context, xPosition, yPosition, xOffset) {
     this.context = context;
     this.x = xPosition;
     this.y = yPosition;
+    this.xOffset = xOffset;
 }
 Bullet.prototype.shootOne = function () {
     context.beginPath();
@@ -64,6 +88,7 @@ Bullet.prototype.shootOne = function () {
     context.arc(this.x, this.y - 15, 5, 0, 2 * Math.PI, true);
     context.fill();
     this.y -= 10;
+    this.x += this.xOffset;
     if (this.y < 0)
         return -1;
     else
@@ -90,7 +115,7 @@ BrickManage.prototype.reflesh = function () {
             alert("GAME OVER");
             clip.splice(0, clip.length);//清空数组 
             brickWarehouse.splice(0, brickWarehouse.length);//清空数组 
-            scoreAll=0;
+            scoreAll = 0;
             //
             brickWarehouse.splice(i, 1);
             continue;
@@ -104,10 +129,11 @@ var Brick = function (context, xPosition, canvasHeight) {
     this.y = 30;
     this.canvasHeight = canvasHeight;
     this.remainTimes = Math.round(Math.random() * (6) + 5);//均衡获取5到10的随机整数;
+    this.ballColor = '#' + Math.floor(Math.random() * 16777210 + 5).toString(16);
 }
 Brick.prototype.downMove = function () {
     context.beginPath();
-    context.fillStyle = '#' + Math.floor(Math.random() * 16777215).toString(16);
+    context.fillStyle = this.ballColor;
     context.arc(this.x, this.y, 20, 0, 2 * Math.PI, true);
     context.fill();
 

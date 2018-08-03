@@ -33,20 +33,26 @@ var UserBall = function (context, canvasWidth, canvasHeight) {
     gunYPosition = 0;
     nowXPosition = canvasWidth / 2;//当前userBall位置
     nowYPosition = canvasHeight * 2 / 3;//当前userBall位置
-
+    this.radius = 10;
     this.shootInterval;
     this.dartImage = new Image();
-
+this.dartRotate = 1;
 
 };
 UserBall.prototype.moveTo = function (x, y) {
 
     if (turnIntoDart) {
-
         //道具模式：飞镖就绪
         this.dartImage.src = "dart.png";
         context.save();
-        context.drawImage(this.dartImage, x - 25, y - 25, 50, 50);
+        context.translate(x,y);
+        context.rotate(-this.dartRotate++ *10*Math.PI/180);
+        context.translate(-x,-y);
+        if (aimShoot) {
+            context.drawImage(this.dartImage, nowXPosition - 25, nowYPosition - 25, 50, 50);
+        } else {
+            context.drawImage(this.dartImage, x - 25, y - 25, 50, 50);
+        } 
         context.restore();
         //道具模式：飞镖结束
     } else {
@@ -54,9 +60,9 @@ UserBall.prototype.moveTo = function (x, y) {
         context.beginPath();
         this.context.fillStyle = "#009688";
         if (aimShoot) {
-            context.arc(nowXPosition, nowYPosition, 10, 0, 2 * Math.PI, true);
+            context.arc(nowXPosition, nowYPosition, this.radius, 0, 2 * Math.PI, true);
         } else {
-            context.arc(x, y, 10, 0, 2 * Math.PI, true);
+            context.arc(x, y, this.radius, 0, 2 * Math.PI, true);
         }
         //context.rect(x - 20, y, 40, 6);
         context.fill();
@@ -101,7 +107,7 @@ UserBall.prototype.shoot = function () {
         for (var j = 0; j < brickWarehouse.length; j++) {
             var x2 = brickWarehouse[j].x;
             var y2 = brickWarehouse[j].y;
-            if (Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow(y1 - y2, 2)) < 15) {
+            if (Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow(y1 - y2, 2)) < this.radius + 5) {
                 //碰撞成功
                 var score = document.getElementById("score");
                 score.innerHTML = "分数：" + ++scoreAll;
@@ -176,7 +182,7 @@ BrickManage.prototype.reflesh = function () {
         var x1 = nowXPosition, y1 = nowYPosition;
         var x2 = brickWarehouse[i].x;
         var y2 = brickWarehouse[i].y;
-        if (Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow(y1 - y2, 2)) < 20) {
+        if (Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow(y1 - y2, 2)) < userBall.radius + 10) {
             //碰撞成功
 
             if (turnIntoDart) {
@@ -188,6 +194,7 @@ BrickManage.prototype.reflesh = function () {
                 clip.splice(0, clip.length);//清空数组 
                 brickWarehouse.splice(0, brickWarehouse.length);//清空数组 
                 propWarehouse.splice(0, propWarehouse.length);//清空数组 
+                propLiveWarehouse.splice(0, propLiveWarehouse.length);//清空数组 
                 scoreAll = 0;
                 gunCount = 0;
                 continue;
@@ -275,7 +282,7 @@ PropManage.prototype.reflesh = function () {
         var x1 = nowXPosition, y1 = nowYPosition;
         var x2 = propWarehouse[i].x;
         var y2 = propWarehouse[i].y;
-        if (Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow(y1 - y2, 2)) < 30) {
+        if (Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow(y1 - y2, 2)) < userBall.radius + 20) {
             console.log(i);
             console.log("type" + propWarehouse[i].type);
             if (propWarehouse[i].type == 2) {
@@ -309,13 +316,15 @@ PropManage.prototype.reflesh = function () {
             //道具生效，5秒钟后失效
             switch (propWarehouse[i].type) {
                 case 1:
-                    userBall.shootInterval = setInterval(shootBullet, 100);//射击速度
+                    userBall.shootInterval = setInterval(shootBullet, 200);//射击速度
                     setTimeout("clearInterval(userBall.shootInterval);", 5000);
 
                     break;
                 case 3:
                     turnIntoDart = true;
+                    userBall.radius = 21;
                     setTimeout("turnIntoDart = false;", 5000);
+                    setTimeout("userBall.radius=10;", 5000);
 
                     break;
             }

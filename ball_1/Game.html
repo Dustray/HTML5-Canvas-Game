@@ -20,29 +20,40 @@
         border: 5px solid #009688;
         border-radius: 20px;
     }
-    .toolbar{
-        color:#009688;
+
+    .toolbar {
+        color: #009688;
         font-size: 20px;
-        
         text-align: left;
+        overflow: hidden;
     }
 
+    .toolbar>p {
+        margin: 0;
+        padding: 0;
+        float: left;
+    }
 </style>
 
 <body>
     <div class="toolbar">
         <p id="score">分数：0</p>
+        <p id="speed">速度：0</p>
+        <p id="gun">霰弹丸：0</p>
+        <input type="radio" id="colorBlack" value="默认" />默认
+        <input type="radio" id="colorVariety" value="默认" />色彩
+        <input type="radio" id="colorDog" value="默认" />狗眼
     </div>
     <canvas id="myCanvas" width="800" height="400"></canvas>
 </body>
 <script type="text/javascript">
     var canvas = document.getElementById("myCanvas");
     var cWidth = 800, cHeight = 400;
-    var moveBar ,bricks;
+    var moveBar, bricks;
     window.onload = window.onresize = function () {
         //alert("ss");
         cWidth = canvas.width = window.innerWidth - 30;
-        cHeight = canvas.height = window.innerHeight - 60;
+        cHeight = canvas.height = window.innerHeight - 55;
         moveBar = new MoveBar(context, cWidth, cHeight);
         bricks = new BrickManage(context, cWidth, cHeight);
         setInterval(function () {
@@ -56,9 +67,15 @@
     canvas.addEventListener("mousedown", onMouseDown, false);
     canvas.addEventListener("mousemove", onMouseMove, false);
     canvas.addEventListener("mouseup", onMouseUp, false);
-
+    document.oncontextmenu = function () {
+        return false;//鼠标右键菜单不显示
+    }
     function onMouseDown(e) {
-        alert("暂停");
+        //霰弹
+        if (gunCount > 0) {
+            moveBar.gunShoot();
+            gunCount--;
+        }
     }
 
     function onMouseMove(e) {
@@ -67,6 +84,11 @@
     }
 
     function onMouseUp(e) {
+        if (e.button == 0) {
+            //alert("暂停");//左键
+        }
+        else if (e.button == 2)
+            alert("暂停");//右键
     }
 
 
