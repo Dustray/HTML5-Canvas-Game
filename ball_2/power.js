@@ -204,7 +204,8 @@ BrickManage.prototype.reflesh = function () {
                 //此处变成飞镖
                 brickWarehouse.splice(i, 1);//消除方块
                 var showScore = document.getElementById("score");
-                showScore.innerHTML = "分数：" + ++scoreAll;
+                scoreAll+=2;
+                showScore.innerHTML = "分数：" + scoreAll;
             } else {
                 //此处应结束游戏
                 alert("GAME OVER  总分：" + scoreAll);

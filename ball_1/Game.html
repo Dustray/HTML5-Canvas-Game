@@ -14,37 +14,37 @@
         overflow: scroll;
         overflow-x: hidden;
         overflow-y: hidden;
+        background-image: url(bodybg.jpg);
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
     }
 
     canvas {
-        border: 5px solid #009688;
-        border-radius: 20px;
+        border: 3px solid #3275f3;
+        border-radius: 5px;
     }
 
-    .toolbar {
-        color: #009688;
-        font-size: 20px;
-        text-align: left;
-        overflow: hidden;
-    }
-
-    .toolbar>p {
+    input {
+        width: 60px;
+        height:25px;
         margin: 0;
         padding: 0;
         float: left;
+        margin:-2px 5px 3px 5px;
+        background: #3275f3;
+        color:#fff;
+        border: 0;
+        border-radius: 2px;
     }
+    input:hover{
 
-    .toolbar>input {
-        margin: 0;
-        padding: 0;
-        float: right;
+        background: #2862ce;
     }
 </style>
 
 <body>
     <div class="toolbar">
-        <p id="score">分数：0</p>
-        <p id="gun">霰弹丸：0</p>
         <input type="button" id="colorBlack" onclick="radioClick(1)" value="默认" />
 
         <input type="button" id="colorVariety" onclick="radioClick(2)" value="色彩" />
@@ -57,18 +57,20 @@
 <script type="text/javascript">
     var canvas = document.getElementById("myCanvas");
     var cWidth = 800, cHeight = 400;
-    var moveBar, bricks;
+    var moveBar, bricks, gameInfo;
     window.onload = window.onresize = function () {
         //alert("ss");
         cWidth = canvas.width = window.innerWidth - 30;
         cHeight = canvas.height = window.innerHeight - 55;
         moveBar = new MoveBar(context, cWidth, cHeight);
         bricks = new BrickManage(context, cWidth, cHeight);
+        gameInfo = new  ShowGameInfo(context);
         setInterval(function () {
             context.clearRect(0, 0, cWidth, cHeight);
             bricks.reflesh();
             moveBar.shoot();
             moveBar.moveTo(nowXPosition);
+            gameInfo.reflesh();
         }, 1000 / 60);
 
     }

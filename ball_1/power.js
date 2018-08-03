@@ -13,7 +13,7 @@ var MoveBar = function (context, canvasWidth, canvasHeight) {
     this.canvasHeight = canvasHeight;
     nowXPosition = canvasWidth / 2;//当前moveBar位置
     this.img = new Image();
-    this.frm=1;
+    this.frm = 1;
     setInterval(function () {
 
         var bullet1 = new Bullet(this.context, nowXPosition, canvasHeight, 0);
@@ -31,16 +31,22 @@ var MoveBar = function (context, canvasWidth, canvasHeight) {
 MoveBar.prototype.moveTo = function (x) {
     if (x - 20 < 0 || x + 20 > this.canvasWidth)
         return;//若x位置超出边界就停止
-    var y = this.canvasHeight - 10;//e.pageY - canvas.clientTop;
+    var y = this.canvasHeight - 60;//e.pageY - canvas.clientTop;
     // context.beginPath();
     // context.arc(x, y - 5, 5, 0, 2 * Math.PI, true);
     // context.rect(x - 20, y, 40, 6);
     // context.fill();
 
+    if (x < nowXPosition) {
+        this.frm = 0;
+    } else if (x == nowXPosition) {
+        this.frm = 1;
+    } else {
+        this.frm = 2;
+    }
     context.save();
-    if(x)
     this.img.src = "plane.png";
-    context.drawImage(this.img, this.frm * 500, 0, 500, 500, x-25, y - 30, 60, 60);
+    context.drawImage(this.img, this.frm * 500, 0, 500, 500, x - 35, y, 70, 70);
     context.restore();
 
     nowXPosition = x;
@@ -58,18 +64,16 @@ MoveBar.prototype.shoot = function () {
         for (var j = 0; j < brickWarehouse.length; j++) {
             var x2 = brickWarehouse[j].x;
             var y2 = brickWarehouse[j].y;
-            if (Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow(y1 - y2, 2)) < 25) {
+            if (Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow(y1 - y2, 2)) < 23) {
                 //碰撞成功
-                var score = document.getElementById("score");
-                score.innerHTML = "分数：" + ++scoreAll;
+
+                gameInfo.score = ++scoreAll;
                 if (scoreAll % 50 == 0 && rewardMode == false) {//开启奖励模式
                     rewardMode = true;
                     setTimeout("rewardMode=false;", 5000);
                 } else if (scoreAll % 20 == 0) {//奖励霰弹丸
-                    //gunCount++;
-                    var gunBullet = document.getElementById("gun");
-                    gunBullet.innerHTML = "霰弹丸：" + ++gunCount;
 
+                    gameInfo.gun = ++gunCount;
                 }
                 if (brickWarehouse[j].remainTimes > 1) {
                     brickWarehouse[j].remainTimes--;
@@ -99,7 +103,7 @@ var Bullet = function (context, xPosition, yPosition, xOffset) {
 Bullet.prototype.shootOne = function () {
     context.beginPath();
     context.fillStyle = "#000";
-    context.arc(this.x, this.y - 15, 5, 0, 2 * Math.PI, true);
+    context.arc(this.x, this.y - 15, 3, 0, 2 * Math.PI, true);
     context.fill();
     this.y -= 10;
     this.x += this.xOffset;
@@ -168,4 +172,18 @@ Brick.prototype.downMove = function () {
         return -1;
     else
         return 0;
+}
+var ShowGameInfo = function (context) {
+    this.context = context;
+    this.score = 0;
+    this.gun = 0;
+}
+ShowGameInfo.prototype.reflesh = function () {
+
+    var text = "分数：" + this.score + " 霰弹丸：" + this.gun;
+    context.beginPath();
+    context.font = "25px Arial";
+    context.fillStyle = "#444";
+    context.fillText(text, 115, 30);
+    context.fill();
 }
