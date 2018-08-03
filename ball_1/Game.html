@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-    <script language="JavaScript" src="power.js"></script>
+    <title>飞机弹球</title>
+    <script language="JavaScript" src="index.js"></script>
 </head>
 <style>
     body {
@@ -21,25 +21,26 @@
     }
 
     canvas {
-        border: 3px solid #3275f3;
-        border-radius: 5px;
+        background:rgba(255, 255, 255,0.5);
+        border: 3px solid #03A9F4;
+        border-radius: 2px;
     }
 
     input {
         width: 60px;
-        height:25px;
-        margin: 0;
-        padding: 0;
+        height: 25px;
         float: left;
-        margin:-2px 5px 3px 5px;
-        background: #3275f3;
-        color:#fff;
+        margin: -2px 5px 3px 5px;
+        padding: 5px 0;
+        background: #03A9F4;
+        color: #fff;
         border: 0;
         border-radius: 2px;
     }
-    input:hover{
 
-        background: #2862ce;
+    input:hover {
+
+        background: #0288D1;
     }
 </style>
 
@@ -64,12 +65,12 @@
         cHeight = canvas.height = window.innerHeight - 55;
         moveBar = new MoveBar(context, cWidth, cHeight);
         bricks = new BrickManage(context, cWidth, cHeight);
-        gameInfo = new  ShowGameInfo(context);
+        gameInfo = new ShowGameInfo(context);
         setInterval(function () {
             context.clearRect(0, 0, cWidth, cHeight);
             bricks.reflesh();
             moveBar.shoot();
-            moveBar.moveTo(nowXPosition);
+            moveBar.reflesh();
             gameInfo.reflesh();
         }, 1000 / 60);
 
